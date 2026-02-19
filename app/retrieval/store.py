@@ -64,13 +64,15 @@ class VectorStore:
             })
         self._save()
 
-    def search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int, return_distances: bool = False):
+        """Return chunks for query. If return_distances=True, returns (chunks, distances)."""
         if self._index is None or len(self._metadata) == 0:
-            return []
+            return ([], []) if return_distances else []
         k = min(top_k, len(self._metadata))
         q_emb = self.embedder.encode([query])
         q_emb = np.asarray(q_emb, dtype=np.float32)
-        _, indices = self._index.search(q_emb, k)
+        distances, indices = self._index.search(q_emb, k)
+        dist_list = distances[0].tolist()
         out = []
         for idx in indices[0]:
             if idx < 0 or idx >= len(self._metadata):
@@ -82,7 +84,50 @@ class VectorStore:
                 "chunk_id": m["chunk_id"],
                 "content": m["content"],
             })
+        if return_distances:
+            return out, dist_list
         return out
+
+    def list_sources(self) -> List[str]:
+        """Return unique source (filename) list."""
+        seen = set()
+        out = []
+        for m in self._metadata:
+            s = m["source"]
+            if s not in seen:
+                seen.add(s)
+                out.append(s)
+        return sorted(out)
+
+    def get_chunks_by_source(self, source: str) -> List[Dict[str, Any]]:
+        """Return all chunks for a given source."""
+        return [m for m in self._metadata if m["source"] == source]
+
+    def delete_by_source(self, source: str) -> int:
+        """Remove all chunks for source and rebuild index. Returns number removed."""
+        import faiss
+        kept = [m for m in self._metadata if m["source"] != source]
+        removed = len(self._metadata) - len(kept)
+        if removed == 0:
+            return 0
+        self._metadata = kept
+        if not kept:
+            self._index = None
+            self._dim = None
+            idx_path = FAISS_INDEX_DIR / INDEX_FILE
+            meta_path = FAISS_INDEX_DIR / META_FILE
+            if idx_path.exists():
+                idx_path.unlink(missing_ok=True)
+            meta_path.write_text("[]", encoding="utf-8")
+            return removed
+        texts = [m["content"] for m in kept]
+        emb = self.embedder.encode(texts)
+        emb = np.asarray(emb, dtype=np.float32)
+        self._dim = emb.shape[1]
+        self._index = faiss.IndexFlatL2(self._dim)
+        self._index.add(emb)
+        self._save()
+        return removed
 
     @property
     def collection(self):

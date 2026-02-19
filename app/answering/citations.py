@@ -3,6 +3,21 @@ import re
 from typing import Any, Dict, List
 
 
+def is_refusal(answer_text: str) -> bool:
+    """True if the answer indicates the model could not find the information (no document citation should be shown)."""
+    if not (answer_text or "").strip():
+        return True
+    lower = answer_text.strip().lower()
+    return (
+        "couldn't find" in lower
+        or "could not find" in lower
+        or "cannot find" in lower
+        or "not in the" in lower
+        or "not in the uploaded" in lower
+        or "not in the provided" in lower
+    )
+
+
 def build_citations_from_chunks(
     chunks: List[Dict[str, Any]],
     answer_text: str,
@@ -10,7 +25,10 @@ def build_citations_from_chunks(
     """
     Produce citations in order of first appearance in the answer. Each citation has source, locator, snippet.
     Snippet: up to 120 chars from the chunk content (or from answer if we detect a quoted part).
+    Returns empty list if the answer is a refusal (so we don't show fake citations).
     """
+    if is_refusal(answer_text):
+        return []
     cited_indices = _extract_cited_indices(answer_text)
     if not cited_indices:
         # Cite all chunks used as context (in order)

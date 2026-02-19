@@ -22,6 +22,8 @@ FAISS_INDEX_DIR = REPO_ROOT / "faiss_index"
 CHUNK_SIZE = 600
 CHUNK_OVERLAP = 100
 TOP_K_RETRIEVAL = 6
+# Relevance: L2 distance above this is treated as "no relevant chunk" (no hallucination)
+RELEVANCE_MAX_L2 = 2.0
 
 # Model
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")

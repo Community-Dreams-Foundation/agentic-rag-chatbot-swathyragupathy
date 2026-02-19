@@ -1,0 +1,111 @@
+{
+  "questions": [
+    {
+      "id": "A1",
+      "question": "Summarize the main contribution in 3 bullets.",
+      "answer": "The main contribution of the agentic RAG (Retrieval-Augmented Generation) system can be summarized as follows:\n\n- **Integration of File-Grounded Question Answering**: The system combines the capabilities of answering questions based on specific files with durable memory, enhancing the relevance and accuracy of responses.\n\n- **Durable Memory Utilization**: It employs selective memory to store high-signal, reusable facts, which improves the efficiency of information retrieval and reduces the storage of unnecessary data.\n\n- **Improved Locator Precision**: Experimental results indicate that section-aware chunking enhances locator precision by approximately 15%, leading to more accurate and relevant answers from the system.",
+      "citations": [
+        {
+          "source": "Catalog Update.pdf",
+          "locator": "page 4",
+          "snippet": "Affected Areas    ●​ Admin Panel - Product Creation  ●​ Admin Panel - Product Edit  ●​ Orders routing & multi-factory..."
+        },
+        {
+          "source": "Shriram Resume.pdf",
+          "locator": "page 2",
+          "snippet": "CERTIFICATIONS • CompTIA Security+ • CompTIA Network+ • Google Cybersecurity Certificate • Cyber Threat Intelligence..."
+        },
+        {
+          "source": "sample.txt",
+          "locator": "document",
+          "snippet": "Agentic RAG Chatbot — Sample Document  Overview This document describes the core features of an agentic RAG (Retrieva..."
+        },
+        {
+          "source": "Shriram Resume.pdf",
+          "locator": "page 1",
+          "snippet": "Shriram KP  +1-585-957-4822 | # shriramkp09@gmail.com | ï shriramkp | § kp18-cpu |  shriramkp.com Erie, PA, United..."
+        },
+        {
+          "source": "Catalog Update.pdf",
+          "locator": "page 2",
+          "snippet": "Data Structure    This will be a delicate part of this update and we will need to develop a data architecture plan fo..."
+        },
+        {
+          "source": "Catalog Update.pdf",
+          "locator": "page 1",
+          "snippet": "Key Objective  Increase MerchFarm sales by offering a new variety of products so we can embrace another  part of the..."
+        }
+      ],
+      "expected_behavior": "grounded summary + citations",
+      "expect_refusal": false,
+      "expect_citations": true,
+      "got_refusal": false,
+      "got_citations": true,
+      "pass": true
+    },
+    {
+      "id": "A2",
+      "question": "What are the key assumptions or limitations?",
+      "answer": "The key assumptions and limitations of the agentic RAG (Retrieval-Augmented Generation) system are as follows:\n\n1. **Supported Formats**: The system assumes that documents are provided in supported formats, such as TXT and PDF.\n\n2. **Retrieval Quality**: A key limitation is that the answers are only as good as the retrieved chunks of information. If the retrieval process fails or returns irrelevant content, the system should refuse to answer rather than provide inaccurate information.\n\n3. **Citation Accuracy**: Experimental results indicate that section-aware chunking improves locator precision by approximately 15% in internal benchmarks, highlighting the importance of effective document structuring for accurate responses.\n\nThese assumptions and limitations are crucial for understanding the reliability and effectiveness of the system in providing accurate information based on the documents it processes [4].",
+      "citations": [
+        {
+          "source": "sample.txt",
+          "locator": "document",
+          "snippet": "Agentic RAG Chatbot — Sample Document  Overview This document describes the core features of an agentic RAG (Retrieva..."
+        }
+      ],
+      "expected_behavior": "grounded answer + citations",
+      "expect_refusal": false,
+      "expect_citations": true,
+      "got_refusal": false,
+      "got_citations": true,
+      "pass": true
+    },
+    {
+      "id": "A3",
+      "question": "Give one concrete numeric/experimental detail and cite it.",
+      "answer": "One concrete numeric detail from the context is that experimental results on citation accuracy show that section-aware chunking improves locator precision by roughly 15% in internal benchmarks [2].",
+      "citations": [
+        {
+          "source": "sample.txt",
+          "locator": "document",
+          "snippet": "Agentic RAG Chatbot — Sample Document  Overview This document describes the core features of an agentic RAG (Retrieva..."
+        }
+      ],
+      "expected_behavior": "specific claim + citation",
+      "expect_refusal": false,
+      "expect_citations": true,
+      "got_refusal": false,
+      "got_citations": true,
+      "pass": true
+    },
+    {
+      "id": "B1",
+      "question": "What is the CEO's phone number?",
+      "answer": "I couldn't find the CEO's phone number in the provided context.",
+      "citations": [],
+      "expected_behavior": "refusal / cannot find; no fake citations",
+      "expect_refusal": true,
+      "expect_citations": false,
+      "got_refusal": true,
+      "got_citations": false,
+      "pass": true
+    },
+    {
+      "id": "B2",
+      "question": "What is the capital of Mars?",
+      "answer": "I couldn't find information about the capital of Mars, as it is a planet without a capital city or government. Mars is primarily studied in the context of space exploration and does not have human settlements or political structures like Earth.",
+      "citations": [],
+      "expected_behavior": "cannot find in documents",
+      "expect_refusal": true,
+      "expect_citations": false,
+      "got_refusal": true,
+      "got_citations": false,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "passed": 5
+  }
+}

@@ -264,6 +264,17 @@ make run
 
 ---
 
+## Implemented enhancements
+
+- **Graceful retrieval failure:** When no relevant chunks are found (or L2 distance exceeds a threshold), the bot refuses to answer and returns no citations (no hallucinations).
+- **Streaming responses:** Use `POST /query/stream` for token-by-token streaming; the web UI uses this by default.
+- **Conversation history:** Sidebar lists past conversations; each session (browser tab) has its own history. Send `X-Session-Id` or `session_id` to scope conversations.
+- **Multi-user support:** Conversations are keyed by session ID (header or form). Different sessions see different conversation lists.
+- **File management:** `GET /files` lists indexed sources; `DELETE /files/{filename}` removes a file from the index; `POST /files/{filename}/reindex` re-indexes; `GET /files/{filename}/chunks` inspects chunks. The UI has a **Files** panel with Chunks / Reindex / Delete.
+- **Evaluation harness:** Run `make eval` (or `python scripts/run_eval.py [scripts/eval_questions.json]`) to run test questions and produce `artifacts/eval_report.json` and `artifacts/eval_report.md` with pass/fail and expected citations/refusal.
+
+---
+
 ## How to test
 
 1. **Sanity check (required for judges)**  

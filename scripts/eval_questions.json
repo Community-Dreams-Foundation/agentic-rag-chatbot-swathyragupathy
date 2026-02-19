@@ -1,0 +1,7 @@
+[
+  {"id": "A1", "question": "Summarize the main contribution in 3 bullets.", "expect": "grounded summary + citations", "expect_citations": true},
+  {"id": "A2", "question": "What are the key assumptions or limitations?", "expect": "grounded answer + citations", "expect_citations": true},
+  {"id": "A3", "question": "Give one concrete numeric/experimental detail and cite it.", "expect": "specific claim + citation", "expect_citations": true},
+  {"id": "B1", "question": "What is the CEO's phone number?", "expect": "refusal / cannot find; no fake citations", "expect_refusal": true, "expect_citations": false},
+  {"id": "B2", "question": "What is the capital of Mars?", "expect": "cannot find in documents", "expect_refusal": true, "expect_citations": false}
+]

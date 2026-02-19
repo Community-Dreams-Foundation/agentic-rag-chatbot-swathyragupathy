@@ -6,157 +6,67 @@
   <title>Agentic RAG Chatbot</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      margin: 0;
-      min-height: 100vh;
-      background: #f5f5f5;
-      color: #1a1a1a;
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; min-height: 100vh; background: #f5f5f5; color: #1a1a1a; display: flex; }
+    .sidebar {
+      width: 260px; min-height: 100vh; background: #fff; border-right: 1px solid #e5e7eb; padding: 1rem; flex-shrink: 0;
     }
-    .layout {
-      max-width:  min(1200px, 96vw);
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-    }
-    h1 {
-      font-size: 1.5rem;
-      margin: 0 0 0.5rem 0;
-      font-weight: 600;
-    }
-    .subtitle {
-      color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-    .upload-bar {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .upload-bar input[type="file"] {
-      font-size: 0.9rem;
-    }
-    .upload-bar button {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
+    .sidebar h1 { font-size: 1.1rem; margin: 0 0 1rem 0; font-weight: 600; }
+    .sidebar .btn { display: block; width: 100%; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; text-align: left; }
+    .sidebar .btn:hover { background: #1d4ed8; }
+    .sidebar .btn.secondary { background: #e5e7eb; color: #1a1a1a; }
+    .sidebar .btn.secondary:hover { background: #d1d5db; }
+    .chat-list { margin-top: 0.5rem; }
+    .chat-item { padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chat-item:hover { background: #f3f4f6; }
+    .chat-item.active { background: #dbeafe; }
+    .main { flex: 1; display: flex; flex-direction: column; max-width: min(1200px, 82vw); padding: 1rem; min-width: 0; }
+    .main h2 { font-size: 1.25rem; margin: 0 0 0.5rem 0; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+    .upload-bar { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .upload-bar input[type="file"] { font-size: 0.9rem; }
+    .upload-bar button { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; }
     .upload-bar button:hover { background: #1d4ed8; }
-    .upload-bar button:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-    .upload-status {
-      font-size: 0.85rem;
-      color: #059669;
-    }
-    .messages {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .msg {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      max-width: 95%;
-    }
-    .msg.user {
-      background: #e0e7ff;
-      align-self: flex-end;
-    }
-    .msg.assistant {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      align-self: flex-start;
-    }
-    .msg .role {
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: #374151;
-    }
-    .msg .text {
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .citations {
-      margin-top: 0.75rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #d1d5db;
-    }
+    .upload-bar button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .upload-status { font-size: 0.85rem; color: #059669; }
+    .files-panel { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: none; }
+    .files-panel.open { display: block; }
+    .files-panel h3 { margin: 0 0 0.5rem 0; font-size: 1rem; }
+    .file-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    .file-row span { flex: 1; }
+    .file-row button { padding: 0.25rem 0.5rem; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; background: #e5e7eb; }
+    .file-row button:hover { background: #d1d5db; }
+    .file-row button.danger { background: #fecaca; }
+    .file-row button.danger:hover { background: #fca5a5; }
+    .chunks-preview { max-height: 200px; overflow-y: auto; font-size: 0.8rem; margin-top: 0.5rem; padding: 0.5rem; background: #f9fafb; border-radius: 4px; }
+    .messages { flex: 1; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; overflow-y: auto; }
+    .msg { padding: 0.75rem 1rem; border-radius: 8px; max-width: 95%; }
+    .msg.user { background: #e0e7ff; align-self: flex-end; }
+    .msg.assistant { background: #ecfdf5; border: 1px solid #a7f3d0; align-self: flex-start; }
+    .msg .role { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #374151; }
+    .msg .text { white-space: pre-wrap; word-break: break-word; }
+    .citations { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #d1d5db; }
     .citations-title { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 0.35rem; }
-    .citation {
-      font-size: 0.8rem;
-      color: #6b7280;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 4px;
-      padding: 0.35rem 0.5rem;
-      margin-bottom: 0.25rem;
-    }
+    .citation { font-size: 0.8rem; color: #6b7280; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.35rem 0.5rem; margin-bottom: 0.25rem; }
     .citation strong { color: #374151; }
-    .input-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: flex-end;
-    }
-    .input-row textarea {
-      flex: 1;
-      min-height: 44px;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      resize: vertical;
-    }
-    .input-row button {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      cursor: pointer;
-    }
+    .input-row { display: flex; gap: 0.5rem; align-items: flex-end; }
+    .input-row textarea { flex: 1; min-height: 44px; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; font-family: inherit; resize: vertical; }
+    .input-row button { background: #2563eb; color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; }
     .input-row button:hover { background: #1d4ed8; }
     .input-row button:disabled { background: #94a3b8; cursor: not-allowed; }
-    .thinking {
-      color: #6b7280;
-      font-size: 0.9rem;
-      padding: 0.5rem 0;
-    }
-    .thinking::after {
-      content: "";
-      animation: dots 1.2s steps(4, end) infinite;
-    }
-    @keyframes dots {
-      0%, 20% { content: "."; }
-      40% { content: ".."; }
-      60%, 100% { content: "..."; }
-    }
+    .thinking { color: #6b7280; font-size: 0.9rem; padding: 0.5rem 0; }
     .error { color: #dc2626; font-size: 0.9rem; }
   </style>
 </head>
 <body>
-  <div class="layout">
+  <aside class="sidebar">
     <h1>Agentic RAG Chatbot</h1>
-    <p class="subtitle">Upload one document (TXT or PDF), then ask questions.</p>
+    <button type="button" class="btn" id="newChatBtn">New chat</button>
+    <button type="button" class="btn secondary" id="filesBtn">Files</button>
+    <div class="chat-list" id="chatList"></div>
+  </aside>
+  <main class="main">
+    <h2 id="currentTitle">New chat</h2>
+    <p class="subtitle">Upload documents (TXT or PDF), then ask questions. Answers stream and cite sources.</p>
 
     <div class="upload-bar">
       <input type="file" id="file" accept=".txt,.pdf" />
@@ -164,114 +74,269 @@
       <span class="upload-status" id="uploadStatus"></span>
     </div>
 
+    <div class="files-panel" id="filesPanel">
+      <h3>Indexed files</h3>
+      <div id="filesList"></div>
+    </div>
+
     <div class="messages" id="messages"></div>
 
     <div class="input-row">
-      <textarea id="input" placeholder="Ask a question about your document..." rows="1"></textarea>
+      <textarea id="input" placeholder="Ask a question about your documents..." rows="1"></textarea>
       <button type="button" id="sendBtn">Send</button>
     </div>
-  </div>
+  </main>
 
   <script>
-    const fileEl = document.getElementById("file");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const uploadStatus = document.getElementById("uploadStatus");
-    const messagesEl = document.getElementById("messages");
-    const inputEl = document.getElementById("input");
-    const sendBtn = document.getElementById("sendBtn");
+    (function () {
+      function sessionId() {
+        var key = "rag_session_id";
+        var id = sessionStorage.getItem(key);
+        if (!id) { id = crypto.randomUUID(); sessionStorage.setItem(key, id); }
+        return id;
+      }
 
-    function addMessage(role, text, citations) {
-      const div = document.createElement("div");
-      div.className = "msg " + role;
-      div.innerHTML =
-        "<span class=\"role\">" + (role === "user" ? "You" : "Assistant") + "</span>" +
-        "<div class=\"text\">" + escapeHtml(text) + "</div>" +
-        (citations && citations.length
+      var fileEl = document.getElementById("file");
+      var uploadBtn = document.getElementById("uploadBtn");
+      var uploadStatus = document.getElementById("uploadStatus");
+      var messagesEl = document.getElementById("messages");
+      var inputEl = document.getElementById("input");
+      var sendBtn = document.getElementById("sendBtn");
+      var newChatBtn = document.getElementById("newChatBtn");
+      var filesBtn = document.getElementById("filesBtn");
+      var filesPanel = document.getElementById("filesPanel");
+      var filesList = document.getElementById("filesList");
+      var chatList = document.getElementById("chatList");
+      var currentTitleEl = document.getElementById("currentTitle");
+
+      var currentConversationId = null;
+      var sid = sessionId();
+
+      function escapeHtml(s) {
+        if (s == null) return "";
+        var div = document.createElement("div");
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function addMessage(role, text, citations, isStreamingPlaceholder) {
+        var div = document.createElement("div");
+        div.className = "msg " + role;
+        if (isStreamingPlaceholder) div.id = "streaming-msg";
+        var citeHtml = (citations && citations.length)
           ? "<div class=\"citations\"><div class=\"citations-title\">Sources</div>" +
             citations.map(function (c) {
-              const loc = c.locator || "";
-              const src = c.source || "";
-              const snip = c.snippet || "";
-              return "<div class=\"citation\"><strong>" + escapeHtml(src) + "</strong> " + escapeHtml(loc) + "<br>" + escapeHtml(snip) + "</div>";
+              return "<div class=\"citation\"><strong>" + escapeHtml(c.source || "") + "</strong> " + escapeHtml(c.locator || "") + "<br>" + escapeHtml(c.snippet || "") + "</div>";
             }).join("") + "</div>"
-          : "");
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function escapeHtml(s) {
-      if (s == null) return "";
-      const div = document.createElement("div");
-      div.textContent = s;
-      return div.innerHTML;
-    }
-
-    function setThinking(show) {
-      let el = document.getElementById("thinking-msg");
-      if (show && !el) {
-        el = document.createElement("div");
-        el.id = "thinking-msg";
-        el.className = "thinking";
-        el.textContent = "Thinking";
-        messagesEl.appendChild(el);
+          : "";
+        div.innerHTML =
+          "<span class=\"role\">" + (role === "user" ? "You" : "Assistant") + "</span>" +
+          "<div class=\"text\">" + escapeHtml(text) + "</div>" + citeHtml;
+        messagesEl.appendChild(div);
         messagesEl.scrollTop = messagesEl.scrollHeight;
-      } else if (!show && el) {
-        el.remove();
+        return div;
       }
-    }
 
-    uploadBtn.addEventListener("click", async function () {
-      const files = fileEl.files;
-      if (!files.length) {
-        uploadStatus.textContent = "Select a file first.";
-        return;
+      function setThinking(show) {
+        var el = document.getElementById("thinking-msg");
+        if (show && !el) {
+          el = document.createElement("div");
+          el.id = "thinking-msg";
+          el.className = "thinking";
+          el.textContent = "Thinking…";
+          messagesEl.appendChild(el);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        } else if (!show && el) el.remove();
       }
-      uploadBtn.disabled = true;
-      uploadStatus.textContent = "Uploading...";
-      const form = new FormData();
-      for (let i = 0; i < files.length; i++) form.append("files", files[i]);
-      try {
-        const r = await fetch("/upload", { method: "POST", body: form });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.detail || "Upload failed");
-        const list = data.uploaded || [];
-        uploadStatus.textContent = list.length ? "Uploaded: " + list.join(", ") : "No valid file (use .txt or .pdf).";
-      } catch (e) {
-        uploadStatus.textContent = "Error: " + e.message;
-        uploadStatus.classList.add("error");
-      }
-      uploadBtn.disabled = false;
-    });
 
-    async function send() {
-      const question = (inputEl.value || "").trim();
-      if (!question) return;
-      inputEl.value = "";
-      addMessage("user", question);
-      sendBtn.disabled = true;
-      setThinking(true);
-      try {
-        const form = new FormData();
+      function renderChatList() {
+        fetch("/conversations?session_id=" + encodeURIComponent(sid))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var convs = data.conversations || [];
+            chatList.innerHTML = "";
+            convs.forEach(function (c) {
+              var item = document.createElement("div");
+              item.className = "chat-item" + (currentConversationId === c.id ? " active" : "");
+              item.textContent = c.title || "Chat";
+              item.onclick = function () { loadConversation(c.id); };
+              chatList.appendChild(item);
+            });
+          })
+          .catch(function () {});
+      }
+
+      function loadConversation(convId) {
+        currentConversationId = convId;
+        fetch("/conversations/" + convId + "?session_id=" + encodeURIComponent(sid))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            currentTitleEl.textContent = data.title || "Chat";
+            messagesEl.innerHTML = "";
+            (data.messages || []).forEach(function (m) {
+              addMessage(m.role, m.content || "", m.citations || []);
+            });
+            renderChatList();
+          })
+          .catch(function () { addMessage("assistant", "Failed to load conversation.", []); });
+      }
+
+      function newChat() {
+        currentConversationId = null;
+        currentTitleEl.textContent = "New chat";
+        messagesEl.innerHTML = "";
+        renderChatList();
+      }
+
+      newChatBtn.onclick = newChat;
+
+      filesBtn.onclick = function () {
+        filesPanel.classList.toggle("open");
+        if (filesPanel.classList.contains("open")) refreshFilesList();
+      };
+
+      function refreshFilesList() {
+        fetch("/files").then(function (r) { return r.json(); }).then(function (data) {
+          var files = data.files || [];
+          filesList.innerHTML = "";
+          files.forEach(function (f) {
+            var row = document.createElement("div");
+            row.className = "file-row";
+            row.innerHTML =
+              "<span>" + escapeHtml(f.filename) + " (" + (f.chunk_count || 0) + " chunks)</span>" +
+              "<button type=\"button\" class=\"chunks\" data-fn=\"" + escapeHtml(f.filename) + "\">Chunks</button>" +
+              "<button type=\"button\" class=\"reindex\" data-fn=\"" + escapeHtml(f.filename) + "\">Reindex</button>" +
+              "<button type=\"button\" class=\"danger delete\" data-fn=\"" + escapeHtml(f.filename) + "\">Delete</button>";
+            filesList.appendChild(row);
+          });
+          filesList.querySelectorAll("button.chunks").forEach(function (btn) {
+            btn.onclick = function () {
+              var fn = btn.getAttribute("data-fn");
+              fetch("/files/" + encodeURIComponent(fn) + "/chunks").then(function (r) { return r.json(); }).then(function (d) {
+                var pre = document.createElement("div");
+                pre.className = "chunks-preview";
+                pre.textContent = JSON.stringify(d.chunks || [], null, 2);
+                var existing = filesList.querySelector(".chunks-preview");
+                if (existing) existing.remove();
+                btn.closest(".files-panel").appendChild(pre);
+              });
+            };
+          });
+          filesList.querySelectorAll("button.reindex").forEach(function (btn) {
+            btn.onclick = function () {
+              var fn = btn.getAttribute("data-fn");
+              fetch("/files/" + encodeURIComponent(fn) + "/reindex", { method: "POST" }).then(function (r) { return r.json(); }).then(function () { refreshFilesList(); }).catch(function () {});
+            };
+          });
+          filesList.querySelectorAll("button.delete").forEach(function (btn) {
+            btn.onclick = function () {
+              if (!confirm("Remove " + btn.getAttribute("data-fn") + " from index?")) return;
+              var fn = btn.getAttribute("data-fn");
+              fetch("/files/" + encodeURIComponent(fn), { method: "DELETE" }).then(function (r) { return r.json(); }).then(function () { refreshFilesList(); }).catch(function () {});
+            };
+          });
+        });
+      }
+
+      uploadBtn.onclick = function () {
+        if (!fileEl.files.length) { uploadStatus.textContent = "Select a file first."; return; }
+        uploadBtn.disabled = true;
+        uploadStatus.textContent = "Uploading…";
+        var form = new FormData();
+        for (var i = 0; i < fileEl.files.length; i++) form.append("files", fileEl.files[i]);
+        fetch("/upload", { method: "POST", body: form })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            uploadStatus.textContent = data.uploaded && data.uploaded.length ? "Uploaded: " + data.uploaded.join(", ") : "No valid file (use .txt or .pdf).";
+            if (filesPanel.classList.contains("open")) refreshFilesList();
+          })
+          .catch(function (e) { uploadStatus.textContent = "Error: " + e.message; uploadStatus.classList.add("error"); })
+          .then(function () { uploadBtn.disabled = false; });
+      };
+
+      function send() {
+        var question = (inputEl.value || "").trim();
+        if (!question) return;
+        inputEl.value = "";
+        addMessage("user", question);
+        sendBtn.disabled = true;
+        setThinking(true);
+
+        var form = new FormData();
         form.append("question", question);
-        const r = await fetch("/query", { method: "POST", body: form });
-        const data = await r.json();
-        setThinking(false);
-        if (!r.ok) throw new Error(data.detail || "Query failed");
-        addMessage("assistant", data.answer || "", data.citations || []);
-      } catch (e) {
-        setThinking(false);
-        addMessage("assistant", "Error: " + e.message, []);
-      }
-      sendBtn.disabled = false;
-    }
+        form.append("session_id", sid);
+        if (currentConversationId) form.append("conversation_id", currentConversationId);
 
-    sendBtn.addEventListener("click", send);
-    inputEl.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        send();
+        var streamDiv = null;
+        var fullText = "";
+
+        fetch("/query/stream", { method: "POST", body: form, headers: { "X-Session-Id": sid } })
+          .then(function (response) {
+            if (!response.ok) throw new Error("Stream failed");
+            setThinking(false);
+            streamDiv = addMessage("assistant", "", null, true);
+            var textEl = streamDiv.querySelector(".text");
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder();
+            var buf = "";
+
+            function read() {
+              return reader.read().then(function (result) {
+                if (result.done) return;
+                buf += decoder.decode(result.value, { stream: true });
+                var lines = buf.split("\n");
+                buf = lines.pop() || "";
+                lines.forEach(function (line) {
+                  if (line.startsWith("data: ")) {
+                    try {
+                      var obj = JSON.parse(line.slice(6));
+                      if (obj.t !== undefined) {
+                        fullText += obj.t;
+                        textEl.textContent = fullText;
+                        messagesEl.scrollTop = messagesEl.scrollHeight;
+                      } else if (obj.answer !== undefined) {
+                        textEl.textContent = obj.answer;
+                        var citeDiv = streamDiv.querySelector(".citations");
+                        if (!citeDiv && obj.citations && obj.citations.length) {
+                          citeDiv = document.createElement("div");
+                          citeDiv.className = "citations";
+                          citeDiv.innerHTML = "<div class=\"citations-title\">Sources</div>";
+                          obj.citations.forEach(function (c) {
+                            var cEl = document.createElement("div");
+                            cEl.className = "citation";
+                            cEl.innerHTML = "<strong>" + escapeHtml(c.source) + "</strong> " + escapeHtml(c.locator) + "<br>" + escapeHtml(c.snippet);
+                            citeDiv.appendChild(cEl);
+                          });
+                          streamDiv.appendChild(citeDiv);
+                        }
+                        if (obj.conversation_id) currentConversationId = obj.conversation_id;
+                        renderChatList();
+                      }
+                    } catch (e) {}
+                  }
+                });
+                return read();
+              });
+            }
+            return read();
+          })
+          .catch(function (e) {
+            setThinking(false);
+            addMessage("assistant", "Error: " + e.message, []);
+          })
+          .then(function () {
+            sendBtn.disabled = false;
+            if (streamDiv) streamDiv.id = "";
+          });
       }
-    });
+
+      sendBtn.onclick = send;
+      inputEl.onkeydown = function (e) {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+      };
+
+      renderChatList();
+    })();
   </script>
 </body>
 </html>

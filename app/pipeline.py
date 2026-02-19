@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 from app.ingestion import parse_file, chunk_document
 from app.retrieval import VectorStore, retrieve
-from app.answering import answer_with_citations, answer_with_citations_and_tools
+from app.answering import answer_with_citations, answer_with_citations_and_tools, answer_with_citations_stream
 from app.memory import maybe_write_memory, append_memory
 
 
@@ -26,6 +26,12 @@ def query(store: VectorStore, question: str, use_weather_tool: bool = True) -> t
     """Retrieve chunks, generate answer with citations. Can use weather tool (Feature C) for weather questions. Returns (answer, citations)."""
     chunks = retrieve(store, question)
     return answer_with_citations_and_tools(question, chunks, use_tools=use_weather_tool)
+
+
+def query_stream(store: VectorStore, question: str):
+    """Document-only streaming: retrieve then stream answer (no weather tool). Yields (kind, answer_or_delta, citations)."""
+    chunks = retrieve(store, question)
+    return answer_with_citations_stream(question, chunks)
 
 
 def process_user_message_for_memory(user_message: str) -> List[Dict[str, str]]:
