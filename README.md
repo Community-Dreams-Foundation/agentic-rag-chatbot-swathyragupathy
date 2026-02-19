@@ -156,7 +156,7 @@ bash scripts/sanity_check.sh
 
 ### 3) Video Walkthrough Link (Required)
 
-Add your video link here:
+Add your video link here: https://drive.google.com/file/d/1icJs_AydjX0z3L82hlRuAhuLZKi1Ds-h/view?usp=sharing
 
 ## Video Walkthrough
 
