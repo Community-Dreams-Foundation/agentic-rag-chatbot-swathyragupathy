@@ -1,6 +1,8 @@
-.PHONY: sanity
+.PHONY: sanity run
 
 sanity:
-	@echo "ERROR: You must implement 'make sanity' for your stack."
-	@echo "It must generate artifacts/sanity_output.json"
-	@exit 1
+	@mkdir -p artifacts
+	@python scripts/run_sanity.py
+
+run:
+	@uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

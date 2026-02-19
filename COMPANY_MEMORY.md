@@ -1,7 +1,5 @@
 # COMPANY MEMORY
 
-<!--
-Append reusable org-wide learnings that could help colleagues too.
-Do NOT dump raw conversation.
-Avoid secrets or sensitive information.
--->
+<!-- High-signal facts only. No raw conversation. -->
+
+- Asset Management often interfaces with Project Finance in our workflows.

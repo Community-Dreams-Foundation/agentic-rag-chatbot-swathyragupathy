@@ -238,17 +238,47 @@ These are optional enhancements. They are not required, but can earn bonus point
 
 ---
 
-## Quick Start (YOU MUST FILL THIS IN)
+## Quick Start
 
-Provide exact commands a judge can run.
+**Prerequisites:** Python 3.10+, OpenAI API key.
 
-Example (replace with your real commands):
+```bash
+# From repo root
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-```text
-# install dependencies
-# run the app
-# open UI or run CLI
+# Set your OpenAI API key (required)
+export OPENAI_API_KEY=sk-your-key-here
+
+# Run sanity check (generates artifacts/sanity_output.json)
+make sanity
+
+# Validate sanity output
+bash scripts/sanity_check.sh
+
+# Run the web app
+make run
+# Then open http://localhost:8000 in a browser. Upload .txt/.pdf files and ask questions.
 ```
+
+---
+
+## How to test
+
+1. **Sanity check (required for judges)**  
+   Set `OPENAI_API_KEY`, then run:
+   ```bash
+   make sanity
+   bash scripts/sanity_check.sh
+   ```
+   This generates `artifacts/sanity_output.json` and validates it. With a valid API key you get real RAG answers and memory writes; with a missing/invalid key the script still produces valid JSON (with error messages in answers and fallback citations).
+
+2. **Web app**  
+   After `make run`, open http://localhost:8000. Use **Upload** to add `.txt` or `.pdf` files, then ask questions in the chat. Answers show citations (source, locator, snippet). User facts (e.g. “I’m a Project Finance Analyst”) are written to `USER_MEMORY.md` and org learnings to `COMPANY_MEMORY.md`. For **weather / time series** (Feature C), ask e.g. “What’s the weather time series for London?” — the bot will call Open-Meteo and return analytics (rolling mean, volatility, etc.). You can also call `GET /weather?location=London` directly.
+
+3. **Evaluation prompts**  
+   Use the questions in `EVAL_QUESTIONS.md` (summarize contribution, assumptions/limitations, retrieval failure, memory selectivity).
 
 ---
 

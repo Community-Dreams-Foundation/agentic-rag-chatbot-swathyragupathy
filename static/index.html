@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentic RAG Chatbot</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+    .layout {
+      max-width:  min(1200px, 96vw);
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem 0;
+      font-weight: 600;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .upload-bar {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .upload-bar input[type="file"] {
+      font-size: 0.9rem;
+    }
+    .upload-bar button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .upload-bar button:hover { background: #1d4ed8; }
+    .upload-bar button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .upload-status {
+      font-size: 0.85rem;
+      color: #059669;
+    }
+    .messages {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .msg {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      max-width: 95%;
+    }
+    .msg.user {
+      background: #e0e7ff;
+      align-self: flex-end;
+    }
+    .msg.assistant {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      align-self: flex-start;
+    }
+    .msg .role {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #374151;
+    }
+    .msg .text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .citations {
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #d1d5db;
+    }
+    .citations-title { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 0.35rem; }
+    .citation {
+      font-size: 0.8rem;
+      color: #6b7280;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 0.35rem 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .citation strong { color: #374151; }
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    .input-row textarea {
+      flex: 1;
+      min-height: 44px;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .input-row button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .input-row button:hover { background: #1d4ed8; }
+    .input-row button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .thinking {
+      color: #6b7280;
+      font-size: 0.9rem;
+      padding: 0.5rem 0;
+    }
+    .thinking::after {
+      content: "";
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%, 20% { content: "."; }
+      40% { content: ".."; }
+      60%, 100% { content: "..."; }
+    }
+    .error { color: #dc2626; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <h1>Agentic RAG Chatbot</h1>
+    <p class="subtitle">Upload one document (TXT or PDF), then ask questions.</p>
+
+    <div class="upload-bar">
+      <input type="file" id="file" accept=".txt,.pdf" />
+      <button type="button" id="uploadBtn">Upload</button>
+      <span class="upload-status" id="uploadStatus"></span>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-row">
+      <textarea id="input" placeholder="Ask a question about your document..." rows="1"></textarea>
+      <button type="button" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const fileEl = document.getElementById("file");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const messagesEl = document.getElementById("messages");
+    const inputEl = document.getElementById("input");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function addMessage(role, text, citations) {
+      const div = document.createElement("div");
+      div.className = "msg " + role;
+      div.innerHTML =
+        "<span class=\"role\">" + (role === "user" ? "You" : "Assistant") + "</span>" +
+        "<div class=\"text\">" + escapeHtml(text) + "</div>" +
+        (citations && citations.length
+          ? "<div class=\"citations\"><div class=\"citations-title\">Sources</div>" +
+            citations.map(function (c) {
+              const loc = c.locator || "";
+              const src = c.source || "";
+              const snip = c.snippet || "";
+              return "<div class=\"citation\"><strong>" + escapeHtml(src) + "</strong> " + escapeHtml(loc) + "<br>" + escapeHtml(snip) + "</div>";
+            }).join("") + "</div>"
+          : "");
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return "";
+      const div = document.createElement("div");
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function setThinking(show) {
+      let el = document.getElementById("thinking-msg");
+      if (show && !el) {
+        el = document.createElement("div");
+        el.id = "thinking-msg";
+        el.className = "thinking";
+        el.textContent = "Thinking";
+        messagesEl.appendChild(el);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      } else if (!show && el) {
+        el.remove();
+      }
+    }
+
+    uploadBtn.addEventListener("click", async function () {
+      const files = fileEl.files;
+      if (!files.length) {
+        uploadStatus.textContent = "Select a file first.";
+        return;
+      }
+      uploadBtn.disabled = true;
+      uploadStatus.textContent = "Uploading...";
+      const form = new FormData();
+      for (let i = 0; i < files.length; i++) form.append("files", files[i]);
+      try {
+        const r = await fetch("/upload", { method: "POST", body: form });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || "Upload failed");
+        const list = data.uploaded || [];
+        uploadStatus.textContent = list.length ? "Uploaded: " + list.join(", ") : "No valid file (use .txt or .pdf).";
+      } catch (e) {
+        uploadStatus.textContent = "Error: " + e.message;
+        uploadStatus.classList.add("error");
+      }
+      uploadBtn.disabled = false;
+    });
+
+    async function send() {
+      const question = (inputEl.value || "").trim();
+      if (!question) return;
+      inputEl.value = "";
+      addMessage("user", question);
+      sendBtn.disabled = true;
+      setThinking(true);
+      try {
+        const form = new FormData();
+        form.append("question", question);
+        const r = await fetch("/query", { method: "POST", body: form });
+        const data = await r.json();
+        setThinking(false);
+        if (!r.ok) throw new Error(data.detail || "Query failed");
+        addMessage("assistant", data.answer || "", data.citations || []);
+      } catch (e) {
+        setThinking(false);
+        addMessage("assistant", "Error: " + e.message, []);
+      }
+      sendBtn.disabled = false;
+    }
+
+    sendBtn.addEventListener("click", send);
+    inputEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+  </script>
+</body>
+</html>

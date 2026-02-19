@@ -1,0 +1,47 @@
+{
+  "implemented_features": [
+    "A",
+    "B",
+    "C"
+  ],
+  "qa": [
+    {
+      "question": "Summarize the main contribution in 3 bullets.",
+      "answer": "The main contribution of the agentic RAG (Retrieval-Augmented Generation) system can be summarized in three bullets:\n\n- **Combination of Technologies**: It integrates file-grounded question answering with durable memory and optional safe tool use, enhancing the system's ability to provide accurate and contextually relevant responses.\n- **Improved Retrieval Accuracy**: The system employs section-aware chunking, which has been shown to improve locator precision by approximately 15% in internal benchmarks, ensuring more relevant content is retrieved.\n- **Selective Memory Usage**: It recommends storing only high-signal, reusable facts in designated memory files, while avoiding the storage of raw conversations or sensitive information, thereby optimizing memory management.",
+      "citations": [
+        {
+          "source": "sample.txt",
+          "locator": "document",
+          "snippet": "Agentic RAG Chatbot \u2014 Sample Document  Overview This document describes the core features of an agentic RAG (Retrieva..."
+        }
+      ]
+    },
+    {
+      "question": "What are the key assumptions or limitations?",
+      "answer": "The key assumptions and limitations of the agentic RAG system are as follows:\n\n1. **Document Format**: The system assumes that documents are provided in supported formats, such as TXT or PDF.\n\n2. **Retrieval Dependence**: A significant limitation is that the quality of the answers is contingent upon the effectiveness of the retrieval process. If the retrieval fails or returns irrelevant content, the system is designed to refuse to answer rather than provide inaccurate information (hallucination).\n\n3. **Citation Accuracy**: Experimental results indicate that section-aware chunking can improve locator precision by approximately 15% in internal benchmarks, highlighting the importance of effective content retrieval.\n\n4. **Selective Memory**: It is recommended to use selective memory by storing only high-signal, reusable facts in designated memory files, while avoiding the storage of raw conversations or sensitive information.",
+      "citations": [
+        {
+          "source": "sample.txt",
+          "locator": "document",
+          "snippet": "Agentic RAG Chatbot \u2014 Sample Document  Overview This document describes the core features of an agentic RAG (Retrieva..."
+        }
+      ]
+    }
+  ],
+  "demo": {
+    "memory_writes": [
+      {
+        "target": "USER",
+        "summary": "User prefers weekly summaries on Mondays."
+      },
+      {
+        "target": "USER",
+        "summary": "User is a Project Finance Analyst."
+      },
+      {
+        "target": "COMPANY",
+        "summary": "Asset Management often interfaces with Project Finance in our workflows."
+      }
+    ]
+  }
+}

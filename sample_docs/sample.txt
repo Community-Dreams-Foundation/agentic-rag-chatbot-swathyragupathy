@@ -1,0 +1,10 @@
+Agentic RAG Chatbot — Sample Document
+
+Overview
+This document describes the core features of an agentic RAG (Retrieval-Augmented Generation) system. The main contribution is combining file-grounded question answering with durable memory and optional safe tool use.
+
+Key assumptions and limitations
+The system assumes documents are provided in supported formats (e.g. TXT, PDF). A key limitation is that answers are only as good as the retrieved chunks; if retrieval fails or returns irrelevant content, the system should refuse to answer rather than hallucinate. Experimental results on citation accuracy show that section-aware chunking improves locator precision by roughly 15% in internal benchmarks.
+
+Recommendations
+Use selective memory: store only high-signal, reusable facts in USER_MEMORY.md and COMPANY_MEMORY.md. Avoid storing raw conversation or sensitive information.

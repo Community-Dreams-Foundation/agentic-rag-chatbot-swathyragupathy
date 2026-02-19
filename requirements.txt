@@ -1,0 +1,15 @@
+# Agentic RAG Chatbot
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+openai>=1.6.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+sentence-transformers>=2.2.2
+
+pypdf2>=3.0.0
+pymupdf>=1.23.0
+
+python-dotenv>=1.0.0
+httpx>=0.25.0

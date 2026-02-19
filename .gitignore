@@ -1,0 +1,8 @@
+.env
+faiss_index/
+uploads/
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
