@@ -90,17 +90,39 @@ def query_endpoint(
     return {"answer": answer, "citations": citations, "conversation_id": conv["id"], "session_id": sid}
 
 
+def _is_weather_question(question: str) -> bool:
+    q = (question or "").strip().lower()
+    return any(
+        w in q for w in ("weather", "temperature", "forecast", "rain", "sunny", "humidity", "how hot", "how cold")
+    )
+
+
 def _stream_query_events(question: str, session_id: str, conversation_id: Optional[str]):
     store = get_store()
     final_answer = None
     final_citations = None
+
+    # Weather-like questions use full query (with tool) and return a single event; no token streaming
+    if _is_weather_question(question):
+        final_answer, final_citations = query(store, question)
+        final_citations = final_citations or []
+        convs = _conversations.setdefault(session_id, [])
+        if conversation_id:
+            conv = next((c for c in convs if c["id"] == conversation_id), None)
+        else:
+            conv = {"id": str(uuid.uuid4()), "title": (question[:50] + "..." if len(question) > 50 else question), "messages": []}
+            convs.append(conv)
+        conv["messages"].append({"role": "user", "content": question})
+        conv["messages"].append({"role": "assistant", "content": final_answer, "citations": final_citations})
+        yield f"data: {json.dumps({'answer': final_answer, 'citations': final_citations, 'conversation_id': conv['id'], 'session_id': session_id})}\n\n"
+        return
+
     for kind, val, cites in query_stream(store, question):
         if kind == "delta":
             yield f"data: {json.dumps({'t': val})}\n\n"
         else:
             final_answer = val
             final_citations = cites or []
-            # Persist to conversation history so we can send conversation_id in same event
             convs = _conversations.setdefault(session_id, [])
             if conversation_id:
                 conv = next((c for c in convs if c["id"] == conversation_id), None)

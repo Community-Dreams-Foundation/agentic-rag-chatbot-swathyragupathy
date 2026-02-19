@@ -273,7 +273,6 @@
         fetch("/query/stream", { method: "POST", body: form, headers: { "X-Session-Id": sid } })
           .then(function (response) {
             if (!response.ok) throw new Error("Stream failed");
-            setThinking(false);
             streamDiv = addMessage("assistant", "", null, true);
             var textEl = streamDiv.querySelector(".text");
             var reader = response.body.getReader();
@@ -282,7 +281,10 @@
 
             function read() {
               return reader.read().then(function (result) {
-                if (result.done) return;
+                if (result.done) {
+                  setThinking(false);
+                  return;
+                }
                 buf += decoder.decode(result.value, { stream: true });
                 var lines = buf.split("\n");
                 buf = lines.pop() || "";
@@ -291,10 +293,12 @@
                     try {
                       var obj = JSON.parse(line.slice(6));
                       if (obj.t !== undefined) {
+                        setThinking(false);
                         fullText += obj.t;
                         textEl.textContent = fullText;
                         messagesEl.scrollTop = messagesEl.scrollHeight;
                       } else if (obj.answer !== undefined) {
+                        setThinking(false);
                         textEl.textContent = obj.answer;
                         var citeDiv = streamDiv.querySelector(".citations");
                         if (!citeDiv && obj.citations && obj.citations.length) {
